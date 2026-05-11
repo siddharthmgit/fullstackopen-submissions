@@ -21,3 +21,8 @@ yarn-error.log*
 # OS-specific files
 .DS_Store
 Thumbs.db
+
+# Ignore practice folders
+part1 practice/
+part2 practice/
+part0 (review pending)/
