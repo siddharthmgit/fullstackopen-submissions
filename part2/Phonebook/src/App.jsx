@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import phonebookService from './services/phonebook'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
-  const windowButton = document.querySelector("#windowButton");
+  const windowButton = document.querySelector("#windowButton")
+  const [notificationMessage, setNotificationMessage] = useState(null)
 
   useEffect(() => {
     phonebookService
@@ -47,6 +49,13 @@ const App = () => {
             setPersons(persons.map(p => p.id === updatedPerson.id ? updatedPerson : p))
             setNewName("")
             setNewNumber("")
+            setNotificationMessage({ text: `Changed ${updatedPerson.name} phonenumber`, type: 'success' })
+            setTimeout(() => { setNotificationMessage(null) }, 5000)
+          })
+          .catch(error => {
+            console.log(error)
+            setNotificationMessage({ text: `Information of ${newPerson.name} has already been removed from server`, type: 'error' })
+            setTimeout(() => { setNotificationMessage(null) }, 5000)
           })
         return
       }
@@ -59,6 +68,8 @@ const App = () => {
         setPersons(persons.concat(createdPerson))
         setNewName("")
         setNewNumber("")
+        setNotificationMessage({ text: `Added ${createdPerson.name}`, type: 'success' })
+        setTimeout(() => { setNotificationMessage(null) }, 5000)
       })
   }
 
@@ -79,16 +90,22 @@ const App = () => {
 
   const delPerson = ({ id, name }) => {
     if (window.confirm(`Do you want to delete ${name}?`)) {
-      console.log(`deleting id ${id} entry`)
+      console.log(`deleted id ${id} entry`)
       phonebookService
         .remove(id)
         .then(() => { setPersons(persons.filter(p => p.id !== id)) })
+        .catch(error => {
+          console.log(error)
+          setNotificationMessage({ text: `Information of ${name} has already been removed from server`, type: 'error' })
+          setTimeout(() => { setNotificationMessage(null) }, 5000)
+        })
     }
   }
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notificationMessage?.text} type={notificationMessage?.type} />
       <div>
         filter shown with<input value={searchTerm} onChange={handleSearch} />
       </div>
