@@ -24,3 +24,6 @@ Thumbs.db
 
 # Ignore practice folders
 practice folders/
+
+#Environment variables
+.env
