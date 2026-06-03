@@ -1,12 +1,11 @@
 const express = require('express')
 const morgan = require('morgan')
-const cors = require('cors')
 
 const app = express()
 
 app.use(express.json())
 app.use(morgan(":method :url :status :res[content-length] - :response-time ms :body"))
-app.use(cors())
+app.use(express.static('dist')); // serve frontend build
 
 persons = [
     {
@@ -77,10 +76,14 @@ app.post('/api/persons', (req, res) => {
     else if (persons.find(p => p.name == body.name))
         return res.status(409).json({ error: 'name must be unique' })
     const person = { id: generateId(), ...body }
-    persons = persons.concat(person)
-    res.json(persons)
+    res.json(person)
 })
 
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {

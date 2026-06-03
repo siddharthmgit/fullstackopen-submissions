@@ -22,7 +22,7 @@ const App = () => {
 
     const newPerson = {
       name: newName,
-      number: newNumber,
+      number: newNumber
     }
     const personExists = persons.some(
       (person) => person.name.toLowerCase() === newPerson.name.toLowerCase()
