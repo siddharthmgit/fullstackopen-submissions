@@ -71,16 +71,18 @@ app.get('/api/persons/:id', (req, res) => {
 })
 
 
-app.delete('/api/persons/:id', (error, req, res, next) => {
+app.delete('/api/persons/:id', (req, res, next) => {
+    Phonebook.findById(req.params.id)
+        .then(person => {
+            if (!person) {
+                return res.status(404).json({ error: 'person does not exist' })
+            }
 
-    Phonebook.findByIdAndDelete(req.params.id)
-        .then(result => {
-            if (!result)
-                return res.status(404).send(`person doesnt exist`)
-
-            return res.json(Phonebook.find({}))
+            return person.deleteOne()
         })
-        .then(updatedList => res.json(updatedList))
+        .then(() => {
+            res.status(204).end()
+        })
         .catch(error => next(error))
 })
 
@@ -104,24 +106,39 @@ app.put('/api/persons/:id', (req, res, next) => {
 })
 
 
-const generateId = () => {
-    const id = Number(Math.round(Math.random() * 100))
-    return id
-}
-app.post('/api/persons', (req, res) => {
+// const generateId = () => {
+//     const id = Number(Math.round(Math.random() * 100))
+//     return id
+// }
+app.post('/api/persons', (req, res, next) => {
     const body = req.body
-    if (!body.name || !body.number)
-        return res.status(400).json({ error: 'name or number is missing' })
-    else if (persons.find(p => p.name == body.name))
-        return res.status(409).json({ error: 'name must be unique' })
-    const person = { id: generateId(), ...body }
-    res.json(person)
+    console.log("this is the sent doc", body)
+    Phonebook.findOne({ name: body.name }).then(name => {
+        if (name)
+            return res.status(409).json({ error: 'name must be unique' })
+        const newPerson = new Phonebook({
+            name: body.name,
+            number: body.number
+        })
+        return newPerson.save().then(savedPerson => res.json(savedPerson))
+    })
+        .catch(error => next(error))
+    // if (!body.name || !body.number)
+    //     return res.status(400).json({ error: 'name or number is missing' })
+    // else if (persons.find(p => p.name == body.name))
+    //     return res.status(409).json({ error: 'name must be unique' })
+    // const person = { id: generateId(), ...body }
+    // res.json(person)
 })
 
 const errorHandler = (error, req, res, next) => {
     console.error(error)
-    if (error.name === 'Cast Error')
-        return response.status(400).send({ error: 'malformatted id' })
+    if (error.name === 'CastError') {
+        return res.status(400).send({ error: 'malformatted id' })
+    }
+    if (error.name === 'ValidationError') {
+        return res.status(400).json({ error: error.message })
+    }
     next(error)
 }
 app.use(errorHandler)

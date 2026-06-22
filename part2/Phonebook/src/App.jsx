@@ -71,6 +71,9 @@ const App = () => {
         setNotificationMessage({ text: `Added ${createdPerson.name}`, type: 'success' })
         setTimeout(() => { setNotificationMessage(null) }, 5000)
       })
+      .catch(error => {
+        console.log(error.response.data.error)
+      })
   }
 
   const handleInputChange = (event) => {

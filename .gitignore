@@ -2,6 +2,9 @@
 part2/Phonebook/node_modules/
 part3/Phonebook_backend/node_modules/
 
+#REST API requests
+part3/Phonebook_backend/requests/
+
 # Build output
 part2/Phonebook/dist/
 
