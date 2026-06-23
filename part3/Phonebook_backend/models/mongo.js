@@ -1,36 +1,36 @@
-const mongoose = require("mongoose")
+const mongoose = require('mongoose')
 
 const url = process.env.MONGODB_URI
-mongoose.set(`strictQuery`, false)
+mongoose.set('strictQuery', false)
 mongoose.connect(url, { family: 4 })
 
 const phoneSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        mingLength: 3,
-        required: true
+  name: {
+    type: String,
+    mingLength: 3,
+    required: true
+  },
+  number: {
+    type: String,
+    validate: {
+      validator: function (v) {
+        return /^\d{2,3}-\d{5,}/.test(v)
+      },
+      message: props => `${props.value} is not a valid phone number!`
     },
-    number: {
-        type: String,
-        validate: {
-            validator: function (v) {
-                return /^\d{2,3}-\d{5,}/.test(v)
-            },
-            message: props => `${props.value} is not a valid phone number!`
-        },
-        required: true
-    }
+    required: true
+  }
 })
 
 phoneSchema.set('toJSON', {
-    transform: (document, returnedObject) => {
-        returnedObject.id = returnedObject._id.toString()
-        delete returnedObject._id
-        delete returnedObject._v
-    }
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString()
+    delete returnedObject._id
+    delete returnedObject._v
+  }
 })
 
-const Phonebook = mongoose.model(`Phone`, phoneSchema)
+const Phonebook = mongoose.model('Phone', phoneSchema)
 
 // if (process.argv.length > 3) {
 //     const name = process.argv[3]
